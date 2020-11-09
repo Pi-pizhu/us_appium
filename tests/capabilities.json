@@ -1,0 +1,7 @@
+{
+        "appPackage": "com.xueqiu.android",
+        "appActivity": ".view.WelcomeActivityAlias",
+        "app": "/Users/yewenkai/PycharmProjects/us_appium/apk/com.xueqiu.android_12.18.1_280.apk",
+        "host": "http://127.0.0.1",
+        "appium_server_port": 4723
+    }

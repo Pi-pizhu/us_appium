@@ -1,0 +1,16 @@
+2020-11-04 21:33:37.880 | DEBUG    | __main__:main:137 - log日志路径：/Users/yewenkai/PycharmProjects/us_appium/tests/log/20201104
+图片文件路径：/Users/yewenkai/PycharmProjects/us_appium/tests/img/20201104
+allure2日志报告路径：/Users/yewenkai/PycharmProjects/us_appium/tests/allure_report
+
+2020-11-04 21:33:37.888 | INFO     | __main__:main:144 - <generator object main.<locals>.<genexpr> at 0x11126bd60>
+2020-11-04 21:33:37.889 | DEBUG    | base.mobile_core:get_devices_ports:99 - ----生成可用appium server端口----
+
+2020-11-04 21:33:37.982 | DEBUG    | base.mobile_core:get_devices_ports:112 - appium server使用端口：
+appium_port:4723
+bootstrap_port:4724
+
+2020-11-04 21:33:37.989 | INFO     | __main__:main:183 - ----启动进程----
+----启动进程id：95077 
+
+2020-11-04 21:39:20.471 | INFO     | __main__:main:189 - ----进程结束:95077 
+
