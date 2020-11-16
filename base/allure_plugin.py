@@ -1,7 +1,7 @@
 import json
 import os
 
-from config.settings import mkdir_file
+from base.file_plugin import mkdir_file
 
 
 class AllurePlugin:

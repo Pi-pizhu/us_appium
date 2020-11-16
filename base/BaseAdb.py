@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 
@@ -20,6 +21,8 @@ class AndroidDebugBridge:
             t = item.decode().split("\tdevice")
             if len(t) >= 2:
                 devices.append(t[0])
+        if len(devices) ==0 :
+            raise ("无有效设备可连接")
         return devices
 
     def restart_device(self, device=None):
@@ -41,4 +44,7 @@ class AndroidDebugBridge:
 
 if __name__ == '__main__':
     adb = AndroidDebugBridge()
+    # print(os.system("source ~/.bash_profile"))
+    # print(os.system("adb devices"))
+    # print(os.system("adb --version"))
     print(adb.get_devices())

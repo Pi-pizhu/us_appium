@@ -1,16 +1,20 @@
-import os
+import os, json
 import time
+from datetime import datetime
 
 from appium.webdriver import WebElement
 from appium.webdriver.common.touch_action import TouchAction
 from appium.webdriver.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
-import config, config
-from base.mobile_core import new_driver
+import config
+from base.BaseAppiumServer import AppiumServer
+from base.mobile_core import new_driver, load_capabilities
 from loguru import logger
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from base.file_plugin import load_file
 
 
 def step_retry(func):
@@ -85,8 +89,7 @@ class DriverBase:
         "同意": (By.XPATH, "//*[@resource-id='com.xueqiu.android:id/tv_agree']")
     }
 
-
-    def __init__(self, work_path=None, singleton=False):
+    def __init__(self, test_work_path):
         """
         初始化：
         1.获取设备信息
@@ -102,8 +105,50 @@ class DriverBase:
         :param work_path:
         :param singleton:
         """
-        if not config.driver:
-            pass
+        if not getattr(config, "driver", None):
+            logger.info(f"当前进程为：{os.getpid()} \n")
+            # 初始化logger文件
+            cunrrent_time = datetime.now().strftime("%Y%m%d")
+            specific_time = datetime.now().strftime("%Y%m%d%H%M%S")
+
+            log_work_file = os.path.join(test_work_path, "log", cunrrent_time)
+            log_file = os.path.join(log_work_file, f"{specific_time}.run.log")
+            logger.add(log_file)
+
+            logger.info("工作路径：%s \n" % test_work_path)
+            # 获取工作路径
+            # print(test_work_path)
+            # test_work_path = os.path.join(os.getcwd(), "examples")
+            work_path = os.path.join(test_work_path, "settings.ini")
+            # 读取server ini配置文件
+            # server_caps_path = get_all_subdirectories(work_path,)
+            instance_ini = load_file(work_path, load_type="ini")
+
+            appium_address = instance_ini.get("appium_caps", "host")
+            info_log_msg = f"appium address：{appium_address} \n"
+            # 加载caps配置信息
+            capabilities = load_capabilities(test_work_path)
+            appium_ports = capabilities["appium_server_ports"]
+            info_log_msg += f"caps配置信息为：{json.dumps(capabilities)} \n"
+
+            # 处理appium 配置信息
+            curn_time = datetime.now().strftime("%Y%m%d")
+            work_log_file = os.path.join(test_work_path, 'log', curn_time)
+            appium_log_file = os.path.join(work_log_file, f"{os.getpid()}_appium.log")
+            info_log_msg += f"appium log日志文件为：{appium_log_file} \n"
+
+            logger.info(info_log_msg)
+            # 启动appium server
+            appium_server = AppiumServer()
+            # 配置信息
+            appium_server.start_server(appium_address=appium_address,
+                                       appium_port=appium_ports['appium_port'],
+                                       bootstrap_port=appium_ports['bootstrap_port'],
+                                       appium_log_file=appium_log_file)
+            # 初始化driver实例
+            self.driver = new_driver(appium_address, appium_ports['appium_port'], capabilities["caps"])
+            config.driver = self.driver
+
             # # 创建一个图片文件夹，用来装失败截图
             # curnt_path = os.path.abspath('.')
             # screshots_img_path = os.path.join(curnt_path, self._screenshots_file)
@@ -112,17 +157,10 @@ class DriverBase:
             # current_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
             # work_screshots_img_path = mkdir_file(screshots_img_path, current_time+"_img")
             # config.screenshots_file = work_screshots_img_path
-            #
-            # # 设置配置信息
-            # capabilities = pase_capabilities(work_path)
-            # address = capabilities.get('address')
-            # proxy = capabilities.get('proxy') if capabilities.get('proxy') else None
-            # # 创建新的实例
-            # self.driver = new_driver(address, capabilities)
-            # config.driver = self.driver
-            # self.driver.implicitly_wait(10)
+
         else:
             self.driver = config.driver
+        self.driver.implicitly_wait(5)
 
     @property
     def driver(self) -> WebDriver:
