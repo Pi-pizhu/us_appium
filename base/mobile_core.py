@@ -44,23 +44,7 @@ def new_driver(address, appium_port, driver_capabilities):
 def pase_capabilities(work_path):
     # 确认capabilities.json
     """
-    配置信息格式：
-    data = {
-        "global_env": {
-            "host": "127.0.0.1",
-            "appium_server_port": 4723
-        }
-        "caps": {}
-    }
-    返回信息：
-    data = {
-        "global_env": {
-            "host": "127.0.0.1",
-            "appium_server_port": 4723
-        }
-        "driver_caps": {}, driver 实例配置信息
-        "device_caps": {}, device 设备配置信息
-    }
+
     :param work_path:
     :return:
     """
@@ -72,7 +56,7 @@ def pase_capabilities(work_path):
 
     capabilities = {}
     for key, value in basis_capabilities.items():
-        if key in ["caps", "appium_server_ports"]:
+        if key in ["host", "caps", "appium_server_ports"]:
             capabilities[key] = value
 
     if not capabilities["caps"].get('appPackage') or not isinstance(capabilities["caps"].get('appPackage'), str):

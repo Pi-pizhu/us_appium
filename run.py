@@ -13,11 +13,12 @@ import pytest
 import config
 from base.BaseAdb import AndroidDebugBridge
 from base.BasePhoneInfo import PhoneInfo
+from base.make import initialize_dir
 from base.mobile_core import get_devices_ports
 from base.BaseAppiumServer import AppiumServer
 from multiprocessing import Pool, Process
 from loguru import logger
-from base.file_plugin import mkdir_file, load_file
+from base.file_plugin import mkdir_dir, load_file
 
 
 def get_device_info(device_id):
@@ -27,69 +28,9 @@ def get_device_info(device_id):
     device_info.update(phoneinfo)
     return device_info
 
-#
-# def appium_server(appium_port, bootstrap_port, host='127.0.0.1'):
-#     # appium_server = RunServer(AppiumServer, appium_port=appium_port, bootstrap_port=bootstrap_port, host=host)
-#     # return appium_server
-#     .start_server(appium_port=appium_port, bootstrap_port=bootstrap_port, host=host)
 
-# def process_main(test_path, work_log_file, work_img_file, appium_ports, device_id, capabilitie, external_cmd: list):
-#     # 多进程启动入口
-#     # todo:需要读取配置文件获取 appium_port、host
-#
-#     # 创建一个appium log日志文件
-#     # 创建一个自动化日志文件
-#     # 需要区分多进程的日志
-#     # 每个日志开头记录设备信息 进程信息 时间日期 运行用例文件路径
-#     process_pid = str(os.getpid())
-#     appium_log_file = os.path.join(work_log_file, f"{process_pid}_appium.log")
-#
-#     tests_log_name = "driver_id+drvier_name.log"
-#
-#     # 启动appium server
-#     logger.info("----启动appium server----\n")
-#     host = capabilitie.pop("host")
-#     appium_host = host.split('//')[1]
-#
-#     logger.debug("appium host:%s \n" % appium_host)
-#
-#     appium_server = AppiumServer()
-#     appium_server.start_server(appium_ports['appium_port'], appium_ports['bootstrap_port'], appium_host, appium_log_file)
-#
-#     # 获取设备信息
-#     device_info = get_device_info(device_id)
-#
-#     # 设置driver 配置
-#     devices_capabilitie = {
-#         "platformName": "Android",
-#         "platformVersion": device_info['platformVersion'],
-#         "deviceName": device_info['device_id'],
-#         "automationName": "uiautomator2",
-#     }
-#     # 设置driver启动地址
-#     driver_address = "%s:%s/wd/hub" % (host, appium_ports['appium_port'])
-#     devices_capabilitie['driver_address'] = driver_address
-#     # 添加用户配置的driver配置参数
-#     devices_capabilitie.update(capabilitie)
-#
-#     # 记录设备信息
-#     device_info_msg = json.dumps(device_info)
-#     logger.info(device_info_msg + "\n")
-#
-#     # 记录driver配置信息
-#     devices_capabilitie_msg = json.dumps(devices_capabilitie)
-#     logger.info(devices_capabilitie_msg + "\n")
-#
-#     # 启动pytest
-#     logger.info("----启动pytest.main---- \n")
-#     logger.info("测试路径为: %s \n" % test_path)
-#
-#     cmd = [test_path, f'--cmdopt={devices_capabilitie}']
-#     cmd.extend(external_cmd)
-#     logger.info("pytest 命令行内容：%s \n" % json.dumps(cmd))
-#
-#     pytest.main(cmd)
-#     appium_server.stop_server()
+def cli():
+    pass
 
 
 def main():
@@ -106,34 +47,20 @@ def main():
     """
     # 从命令行读取 或者通过获取运行路径
     test_path = '/Users/yewenkai/PycharmProjects/us_appium/examples'
-
-    cunrrent_time = datetime.now().strftime("%Y%m%d")
+    # 获取当前时间
     specific_time = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    work_log_path = test_path + "/log/"
-    work_img_path = test_path + "/img/"
-
-    if not os.path.isdir(work_log_path):
-        # 创建一个log日志文件夹
-        work_log_path = mkdir_file(test_path, "log")
-
-    if not os.path.isdir(work_img_path):
-        work_img_path = mkdir_file(test_path, "img")
-
-    # 创建一个log日志文件夹
-    work_log_file = mkdir_file(work_log_path, cunrrent_time)
-    # 创建一个图片文件夹
-    work_img_file = mkdir_file(work_img_path, cunrrent_time)
+    ini_dirs = initialize_dir(test_path)
 
     # 初始化logger日志文件
-    log_file = os.path.join(work_log_file, f"{specific_time}.run.main.log")
+    log_file = os.path.join(ini_dirs["work_tests_log"], f"{specific_time}.run.main.log")
     logger.add(log_file)
 
     # 生成allure2日志报告存放路径
-    allure2_report_path = mkdir_file(test_path, "allure_report")
+    allure2_report_path = mkdir_dir(test_path, "allure_report")
 
-    log_msg = f"log日志路径：{work_log_file}\n"
-    log_msg += f"图片文件路径：{work_img_file}\n"
+    log_msg = f"log日志路径：{ini_dirs['work_log_path']}\n"
+    log_msg += f"图片文件路径：{ini_dirs['work_img_path']}\n"
     log_msg += f"allure2日志报告路径：{allure2_report_path}\n"
     # 记录log、图片日志
     logger.debug(log_msg)
@@ -151,10 +78,10 @@ def main():
     settings_file = os.path.join(test_path, "settings.ini")
     settings_ini = load_file(settings_file, load_type="ini")
 
-    # appium_caps_list = settings_ini.items("appium_caps")
     driver_caps_list = settings_ini.items("driver_caps")
 
     appium_server_port = int(settings_ini.get("appium_caps", "appium_port"))
+    host = settings_ini.get("appium_caps", "host")
 
     driver_caps = {}
     for driver_cap in driver_caps_list:
@@ -178,6 +105,7 @@ def main():
         device_info = get_device_info(devices[i])
         devices_info[device_info["device_name"]] = {
             "using_state": "no",
+            "host": host,
             "appium_server_ports": {
                 "appium_port": appium_ports[i]["appium_port"],
                 "bootstrap_port": appium_ports[i]["bootstrap_port"],
@@ -192,8 +120,8 @@ def main():
     temporary_caps_file = os.path.join(test_path, "capabilities.json")
     with open(temporary_caps_file, "w") as caps_file:
         json.dump(devices_info, caps_file)
-
-    cmd = [test_path, ]
+    # +"/test_main.py::TestMain::test_article_action"
+    cmd = ["-v", test_path]
     if start_num > 1:
         cmd.append(f"-n={start_num}")
 

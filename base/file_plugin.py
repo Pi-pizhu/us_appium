@@ -123,16 +123,19 @@ def get_all_subdirectories(path=get_current_path(), filter_name=None) -> list:
         return file
 
 
-def mkdir_file(file_path, file_name):
+def mkdir_dir(*file_path):
+    file_path = os.path.join(*file_path)
+    logger.debug(f"创建目录：{file_path} \n")
     # 创建一个目录
-    if not os.path.isdir(file_path):
-        raise("不是一个目录")
 
-    new_file_name = os.path.join(file_path, file_name)
-    if os.path.exists(new_file_name):
-        return new_file_name
-    os.mkdir(new_file_name)
-    return new_file_name
+    if os.path.exists(file_path):
+        return file_path
+    try:
+        os.makedirs(file_path)
+    except Exception as error:
+        logger.error(f"创建目录失败：{error}")
+        raise error
+    return file_path
 
 
 def locate_file(start_path, file_name):

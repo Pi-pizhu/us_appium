@@ -104,6 +104,14 @@ class MainPage(DriverBase):
     }
 #################################
     # 雪球热股榜
+
+    # 热股榜返回
+    _hot_back_btn = {
+        "step_type": "click",
+        "local": "//*[@resource-id='com.xueqiu.android:id/back']",
+        "position_type": MobileBy.XPATH
+    }
+
     # 热股榜 全部
     _hot_all_stocks = {
         "step_type": "click",
@@ -132,7 +140,7 @@ class MainPage(DriverBase):
 
     _hot_stocks_four = {
         "step_type": "click",
-        "local": "//*[@resource-id='ccom.xueqiu.android:id/stock_four']",
+        "local": "//*[@resource-id='com.xueqiu.android:id/stock_four']",
         "position_type": MobileBy.XPATH
     }
 
@@ -156,6 +164,19 @@ class MainPage(DriverBase):
     }
 #################################
     # 热门话题
+    # 话题返回
+    _topic_back_btn = {
+        "step_type": "click",
+        "local": "//*[@resource-id='com.xueqiu.android:id/tv_action_back']",
+        "position_type": MobileBy.XPATH
+    }
+
+    _topic_msg_back_btn = {
+        "step_type": "click",
+        "local": "//*[@resource-id='com.xueqiu.android:id/transparent_action_back']",
+        "position_type": MobileBy.XPATH
+    }
+
     # 全部
     _hot_all_topic = {
         "step_type": "click",
@@ -166,14 +187,14 @@ class MainPage(DriverBase):
     # 话题1
     _hot_topic_one = {
         "step_type": "click",
-        "local": "//*[@resource-id='com.xueqiu.android:id/hot_topic_rv']/android.widget.LinearLayout[1]/*com.xueqiu.android:id/topic_background_image",
+        "local": "//*[@resource-id='com.xueqiu.android:id/hot_topic_rv']/android.widget.LinearLayout[1]//android.widget.ImageView",
         "position_type": MobileBy.XPATH
     }
 
     # 话题2
     _hot_topic_two = {
         "step_type": "click",
-        "local": "//*[@resource-id='com.xueqiu.android:id/hot_topic_rv']/android.widget.LinearLayout[2]/*com.xueqiu.android:id/topic_background_image",
+        "local": "//*[@resource-id='com.xueqiu.android:id/hot_topic_rv']/android.widget.LinearLayout[2]//android.widget.ImageView",
         "position_type": MobileBy.XPATH
     }
 #################################
@@ -217,21 +238,21 @@ class MainPage(DriverBase):
     # 推荐文章 转发按钮
     _recommended_article_retweet = {
         "step_type": "click",
-        "local": "//*[@resource-id='com.xueqiu.android:id/recommend_recycler_view']/android.widget.LinearLayout[1]/*com.xueqiu.android:id/retweet_count_view",
+        "local": "//*[@resource-id='com.xueqiu.android:id/retweet_count_view']/android.widget.ImageView",
         "position_type": MobileBy.XPATH
     }
 
     # 推荐文章 评论按钮
     _recommended_article_comment = {
         "step_type": "click",
-        "local": "//*[@resource-id='com.xueqiu.android:id/recommend_recycler_view']/android.widget.LinearLayout[1]/*com.xueqiu.android:id/comment_count_view",
+        "local": "//*[@resource-id='com.xueqiu.android:id/comment_count_view']/android.widget.ImageView",
         "position_type": MobileBy.XPATH
     }
 
     # 推荐文章 点赞按钮
     _recommended_article_reward = {
         "step_type": "click",
-        "local": "//*[@resource-id='com.xueqiu.android:id/recommend_recycler_view']/android.widget.LinearLayout[1]/*com.xueqiu.android:id/reward_count_view",
+        "local": "//*[@resource-id='com.xueqiu.android:id/reward_count_view']/android.widget.ImageView",
         "position_type": MobileBy.XPATH
     }
 
@@ -311,6 +332,10 @@ class MainPage(DriverBase):
         return self
 
     # 热股榜 相关内容
+    def hot_back_btn(self):
+        self.step(**self._hot_back_btn)
+        return self
+
     def goto_hot_all_stocks(self):
         self.step(**self._hot_all_stocks)
         return self
@@ -344,8 +369,16 @@ class MainPage(DriverBase):
         return self
 
     # 热门话题
+    def topic_back_btn(self):
+        self.step(**self._topic_back_btn)
+        return self
+
     def goto_hot_all_topic(self):
         self.step(**self._hot_all_topic)
+        return self
+
+    def topic_msg_back_btn(self):
+        self.step(**self._topic_msg_back_btn)
         return self
 
     def click_hot_topic_one(self):
@@ -385,15 +418,15 @@ class MainPage(DriverBase):
         return self
 
     def click_recommended_article_retweet(self):
-        self.step(**self._recommended_article_retweet)
+        self.step(**self._recommended_article_retweet, elements_index=1)
         return self
 
     def click_recommended_article_comment(self):
-        self.step(**self._recommended_article_comment)
+        self.step(**self._recommended_article_comment, elements_index=1)
         return self
 
     def click_recommended_article_reward(self):
-        self.step(**self._recommended_article_reward)
+        self.step(**self._recommended_article_reward, elements_index=1)
         return self
 
     def goto_recommended_write_article(self):
