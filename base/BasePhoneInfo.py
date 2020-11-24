@@ -16,6 +16,7 @@ from loguru import logger
 
 
 def eliminate_special_symbols(func):
+    # 将换行符消除
     def perform_func(*args, **kwargs):
         results: str = func(*args, **kwargs)
         return results.replace('\n', '') if results else None
@@ -23,6 +24,7 @@ def eliminate_special_symbols(func):
 
 
 def eliminate_blank_space(func):
+    # 将多余的空格消除
     def perform_func(*args, **kwargs):
         results: str = func(*args, **kwargs)
         return results.replace(' ', '') if results else None

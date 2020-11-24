@@ -9,19 +9,11 @@ from base.file_plugin import get_all_subdirectories, load_file
 
 def new_driver(address, appium_port, driver_capabilities):
     """
-    1.加载配置文件
-    2.开启appium server
-    3.创建driver实例
+    创建 driver 实例
     :param address:
     :param capabilities:
     :return:
     """
-    # 启动appium server
-    ## 获取appium port、bootstrap port
-
-    # 获取driver Remote地址、driver配置信息
-    # driver_capabilities = data['driver_caps']
-
     driver_address = f"http://{address}:{appium_port}/wd/hub"
     driver_caps_log_msg = f"driver address：{driver_address} \n"
     driver_caps_log_msg += f"driver caps：{json.dumps(driver_capabilities)} \n"
@@ -29,13 +21,8 @@ def new_driver(address, appium_port, driver_capabilities):
     # todo:记录device配置信息
 
     # 创建driver实例
-    platformName = driver_capabilities['platformName'].lower()
     logger.info("----创建driver实例----\n")
-    driver = None
-    if platformName == 'android':
-        driver = webdriver.Remote(command_executor=driver_address, desired_capabilities=driver_capabilities)
-    elif platformName == 'ios':
-        driver = webdriver.Remote(command_executor=driver_address, desired_capabilities=driver_capabilities)
+    driver = webdriver.Remote(command_executor=driver_address, desired_capabilities=driver_capabilities)
 
     logger.info("driver实例创建成功：%s \n" % driver)
     return driver
@@ -72,23 +59,6 @@ def load_capabilities(work_path):
     # 加载配置信息
     capabilities = pase_capabilities(work_path)
     return capabilities
-#
-# def get_devices():
-#     # adb 获取Android devices设备清单
-#     devices_data = os.popen("adb devices")
-#
-#     devices_msg = devices_data.read()
-#     devices_data.close()
-#
-#     devices_msg = devices_msg[25:]
-#
-#     devices_msg_lists = devices_msg.split('\t')
-#     n = 0
-#     devices_lists = []
-#     while n <= len(devices_msg_lists) - 1:
-#         devices_lists.append(devices_msg_lists[n])
-#         n += 2
-#     return devices_lists
 
 
 def _query_port(port):

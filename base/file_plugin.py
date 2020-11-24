@@ -9,7 +9,7 @@ from loguru import logger
 
 
 def get_current_path() -> str:
-    # 获取当前工作目录绝对路径
+    # 获取当前工作目录
     return os.getcwd()
 
 
@@ -20,9 +20,7 @@ def _load_ini_file(ini_file):
     except Exception as error:
         err_msg = f"IniError:\nfile: {ini_file}\nerror: {error}"
         raise error
-
-    # self.config.items(section) 返回内容指定部分
-    # 返回所有内容
+    # 返回ini content实例
     return instance_ini
 
 
@@ -35,7 +33,6 @@ def _load_json_file(json_file):
     with open(json_file, encoding="utf-8") as data_path:
         try:
             json_content = json.load(data_path)
-            print(json_content)
         except json.JSONDecodeError as error:
             err_msg = f"JsonError:\nfile: {json_file}\nerror: {error}"
             raise err_msg
@@ -55,8 +52,20 @@ def _load_yaml_file(yaml_file):
         except yaml.YAMLError as error:
             err_msg = f"YamlError:\nfile: {yaml_file}\nerror: {error}"
             raise err_msg
-
     return yaml_content
+
+
+def select_caps(data: dict):
+    for key, value in data.items():
+        if value["using_state"] == "no":
+            config_infor = copy.deepcopy(value)
+            value["using_state"] = "yes"
+            break
+        else:
+            config_infor = None
+    if not config_infor:
+        raise ("没有足够的driver配置信息")
+    return data, config_infor
 
 
 def _load_caps(json_file):
@@ -72,18 +81,6 @@ def _load_caps(json_file):
         caps_file.write(json.dumps(data))
 
         return config_infor
-
-def select_caps(data: dict):
-    for key, value in data.items():
-        if value["using_state"] == "no":
-            config_infor = copy.deepcopy(value)
-            value["using_state"] = "yes"
-            break
-        else:
-            config_infor = None
-    if not config_infor:
-        raise ("没有足够的driver配置信息")
-    return data, config_infor
 
 
 def load_file(load_file, load_type='ini'):

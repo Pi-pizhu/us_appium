@@ -4,6 +4,8 @@ from base.file_plugin import mkdir_dir
 
 
 def initialize_dir(test_path):
+    # 初始化目录
+
     # 获取当前时间
     day_time = datetime.now().strftime("%Y%m%d")
 

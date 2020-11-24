@@ -8,6 +8,7 @@ from appium.webdriver.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
 import config
+from base.BaseAdb import AndroidDebugBridge
 from base.BaseAppiumServer import AppiumServer
 from base.make import initialize_dir
 from base.mobile_core import new_driver, load_capabilities
@@ -16,28 +17,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from base.file_plugin import load_file
-
-
-def step_retry(func):
-    # 重试定位函数，可以用pytest重试替代
-    def perform_func(self, *func_args, **func_kwargs):
-        try:
-            element_msg = func(self, *func_args, **func_kwargs)
-            # 如果成功，当前重试次数清零
-            self._current_retry_number = 0
-            return element_msg
-        except Exception as error:
-            err_msg = json.dumps(func_kwargs) + "\n"
-            if self._current_retry_number == self._max_position_retry:
-                # 抛出错误之前需要先截图
-                self.screenshots()
-                err_msg += "raise报错信息：%s \n" %error
-                logger.error(err_msg)
-                raise error
-            self._current_retry_number += 1
-            # todo：添加重试日志提示
-            return func(self, *func_args, **func_kwargs)
-    return perform_func
 
 
 def exception_scene_recovery(func):
@@ -87,6 +66,7 @@ class DriverBase:
     _max_position_retry = 3
     _current_retry_number = 0
     _screenshots_path = 'Screshots_img'
+    _adb_instance = None
     # 因为tuple是不可变的数据类型，
     # 当装饰器exception_scene_recovery递减内部字典时，不会修改这个变量的内容
     _abnormal_bounding_box_information: dict = {
@@ -161,11 +141,15 @@ class DriverBase:
 
     @property
     def touch_instance(self):
-        return self.touch_instance
+        if not self._touch_instance:
+            self._touch_instance = TouchAction()
+        return self._touch_instance
 
-    @touch_instance.setter
-    def touch_instance(self, touch_instance):
-        self._touch_instance = touch_instance
+    @property
+    def adb_instance(self):
+        if not self._adb_instance:
+            self._adb_instance = AndroidDebugBridge()
+        return self._adb_instance
 
     @property
     def abnormal_bounding_box_information(self):
@@ -198,17 +182,9 @@ class DriverBase:
         wait_element = WebDriverWait(self.driver, wait_time, sweep_frequency)
 
         if element_type == 'element':
-        #     if search_type == '':
-        #         return wait_element.until(EC.presence_of_element_located(locator))
-        #     elif search_type == '':
-        #         return wait_element.until(EC.invisibility_of_element(locator))
             return wait_element.until(EC.element_to_be_clickable(locator))
         else:
             return wait_element.until(EC.visibility_of_all_elements_located(locator))
-        #     if search_type == '':
-        #         return wait_element.until(EC.presence_of_all_elements_located(locator))
-        #     elif search_type == '':
-        #         return wait_element.until(EC.visibility_of_all_elements_located(locator))
 
     def step(self, step_type, local, position_type = By.XPATH, desc_information=None,
              wait_time = _wait_time, sweep_frequency = _sweep_frequency,
@@ -274,25 +250,20 @@ class DriverBase:
                 return self.driver
 
     def _touch_action(self, step_type, desc_information=None):
-        if not self.touch_instance:
-            touch_instance = TouchAction()
-        else:
-            touch_instance = self.touch_instance
-
         if step_type == 'press':
-            touch_instance.press(desc_information)
+            self.touch_instance.press(desc_information)
         elif step_type == 'wait':
-            touch_instance.wait(desc_information)
+            self.touch_instance.wait(desc_information)
         elif step_type == 'longpress':
-            touch_instance.long_press(desc_information)
+            self.touch_instance.long_press(desc_information)
         elif step_type == 'perform':
-            touch_instance.perform()
+            self.touch_instance.perform()
         elif step_type == 'release':
-            touch_instance.release()
+            self.touch_instance.release()
         elif step_type == 'move':
-            touch_instance.move_to(desc_information)
+            self.touch_instance.move_to(desc_information)
         elif step_type == 'tap':
-            touch_instance.tap(desc_information)
+            self.touch_instance.tap(desc_information)
         else:
             raise("没有对应的touch_action操作")
 
@@ -319,7 +290,16 @@ class DriverBase:
         self.appium_server.stop_server()
 
     def start_activity(self):
+        # 启动app到指定activity上
         self.driver.start_activity(app_package=self._appPackage, app_activity=self._appActivity)
+
+    def file_push(self, file_path, store_path):
+        # 文件导入
+        self.adb_instance.file_push(file_path, store_path)
+
+    def file_pull(self, file_path, store_path):
+        # 文件导出
+        self.adb_instance.file_pull(file_path, store_path)
 
 if __name__ == '__main__':
     # a = time.time()

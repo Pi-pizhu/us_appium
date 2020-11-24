@@ -71,11 +71,3 @@ class AppiumServer:
             self._retry -= 1
             sleep(2)
             return self.detection_communication(appium_port, bootstrap_port, appium_address, appium_log_file)
-
-
-if __name__ == '__main__':
-    server = AppiumServer()
-    server._port = 4723
-    resp = server.detection_communication(appium_port=4723, appium_address='127.0.0.1')
-    print(resp)
-    print(type(resp))
